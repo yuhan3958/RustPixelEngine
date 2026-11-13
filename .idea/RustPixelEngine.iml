@@ -21,6 +21,8 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/rpe/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/cpu-renderer/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/hello-window/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/keyboard/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/pixels/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>

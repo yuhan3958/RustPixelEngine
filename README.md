@@ -22,7 +22,8 @@ Rust 2024 Edition을 지원하는 툴체인과 Cargo, 창을 표시할 수 있�
 ```sh
 cargo run -p hello-window
 cargo run -p cpu-renderer-example
-cargo run -p rust-pixel-engine --example keyboard
+cargo run -p keyboard-example
+cargo run -p pixels-example
 ```
 
 첫 명령은 창과 생명주기 예제, 두 번째는 키보드 예제입니다. 외부 게임 프로젝트에서는 저장소 위치에 맞춰 경로 의존성을 지정할 수 있습니다.
@@ -52,6 +53,14 @@ impl Game for MyGame {
         if ctx.input().just_pressed(Key::Escape) {
             ctx.request_exit();
         }
+    }
+
+    fn render(&mut self, _ctx: &mut Context, frame: &mut RenderFrame) {
+        frame.commands.push(DrawCommand::Clear(Color { r: 24, g: 30, b: 45, a: 255 }));
+        frame.commands.push(DrawCommand::Rect {
+            rect: Rect { x: 40, y: 30, width: 80, height: 60 },
+            color: Color { r: 255, g: 100, b: 40, a: 255 },
+        });
     }
 
     fn shutdown(&mut self, ctx: &mut Context) {

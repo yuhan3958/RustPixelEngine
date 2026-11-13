@@ -20,7 +20,9 @@ members = [
     "crates/rpe-ui", "crates/rpe", "crates/rpe-core", "crates/rpe-platform", "crates/rpe-input", "crates/rpe-math", "crates/rpe-render",
 
     "examples/hello-window",
-    "examples/cpu-renderer"
+    "examples/cpu-renderer",
+    "examples/keyboard",
+    "examples/pixels"
 ]
 
 default-members = [

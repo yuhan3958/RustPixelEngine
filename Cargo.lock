@@ -612,6 +612,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "hello-window"
+version = "0.1.0"
+dependencies = [
+ "rust-pixel-engine",
+]
+
+[[package]]
 name = "hermit-abi"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

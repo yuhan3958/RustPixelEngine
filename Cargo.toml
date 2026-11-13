@@ -18,6 +18,8 @@ members = [
     "crates/rpe-physics",
     "crates/rpe-audio",
     "crates/rpe-ui", "crates/rpe", "crates/rpe-core", "crates/rpe-platform", "crates/rpe-input", "crates/rpe-math", "crates/rpe-render",
+
+    "examples/hello-window"
 ]
 
 default-members = [

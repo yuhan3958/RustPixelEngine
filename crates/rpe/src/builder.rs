@@ -75,6 +75,18 @@ mod tests {
     }
 
     #[test]
+    fn custom_configuration_is_retained() {
+        let config = EngineBuilder::new()
+            .title("Example")
+            .resolution(640, 360)
+            .window_size(800, 600);
+        assert_eq!(config.title, "Example");
+        assert_eq!((config.logical_width, config.logical_height), (640, 360));
+        assert_eq!((config.window_width, config.window_height), (800, 600));
+        assert!(config.validate().is_ok());
+    }
+
+    #[test]
     fn rejects_zero_resolution() {
         let config = EngineBuilder::new().resolution(0, 180);
         assert!(config.validate().is_err());

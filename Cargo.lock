@@ -320,6 +320,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "cpu-renderer-example"
+version = "0.1.0"
+dependencies = [
+ "rust-pixel-engine",
+]
+
+[[package]]
 name = "crc32fast"
 version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"

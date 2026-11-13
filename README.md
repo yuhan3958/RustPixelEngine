@@ -19,6 +19,7 @@ Rust 2024 Edition을 지원하는 툴체인과 Cargo, 창을 표시할 수 있�
 
 ```sh
 cargo run -p hello-window
+cargo run -p cpu-renderer-example
 cargo run -p rust-pixel-engine --example keyboard
 ```
 

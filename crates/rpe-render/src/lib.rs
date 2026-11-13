@@ -1,4 +1,4 @@
-﻿//! Renderer-independent drawing commands.
+//! Renderer-independent drawing commands.
 
 /// A color represented by straight RGBA components.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]

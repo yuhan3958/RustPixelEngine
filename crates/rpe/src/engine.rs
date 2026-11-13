@@ -1,7 +1,7 @@
-use std::time::{Duration, Instant};
-use std::sync::Arc;
 #[cfg(feature = "cpu")]
 use rpe_render::RenderBackend;
+use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use rpe_core::{Context, EngineError, Game, Lifecycle, LifecycleState};
 use rpe_platform::winit::{
@@ -122,7 +122,10 @@ impl<G: Game> Runtime<G> {
         }
 
         #[cfg(feature = "cpu")]
-        { self.surface = None; self.renderer = None; }
+        {
+            self.surface = None;
+            self.renderer = None;
+        }
         self.window = None;
         if self.lifecycle.state() == LifecycleState::Stopping {
             self.lifecycle
@@ -191,11 +194,20 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
         {
             self.surface = match rpe_platform::SoftwareSurface::new(window.clone()) {
                 Ok(surface) => Some(surface),
-                Err(error) => { self.fail(EngineError::Render(Box::new(error)), event_loop); return; }
+                Err(error) => {
+                    self.fail(EngineError::Render(Box::new(error)), event_loop);
+                    return;
+                }
             };
-            self.renderer = match rpe_render_cpu::CpuRenderer::new(self.config.logical_width, self.config.logical_height) {
+            self.renderer = match rpe_render_cpu::CpuRenderer::new(
+                self.config.logical_width,
+                self.config.logical_height,
+            ) {
                 Ok(renderer) => Some(renderer),
-                Err(error) => { self.fail(EngineError::Render(Box::new(error)), event_loop); return; }
+                Err(error) => {
+                    self.fail(EngineError::Render(Box::new(error)), event_loop);
+                    return;
+                }
             };
         }
         let size = window.inner_size();
@@ -237,21 +249,34 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
                 self.context.request_exit();
                 event_loop.exit();
             }
-            WindowEvent::Resized(size) => { self.context.set_window_size(size.width, size.height); window.request_redraw(); },
+            WindowEvent::Resized(size) => {
+                self.context.set_window_size(size.width, size.height);
+                window.request_redraw();
+            }
             #[cfg(feature = "cpu")]
             WindowEvent::RedrawRequested => {
-                if self.suspended { return; }
-                let (Some(game), Some(renderer), Some(surface)) = (self.game.as_mut(), self.renderer.as_mut(), self.surface.as_mut()) else { return; };
+                if self.suspended {
+                    return;
+                }
+                let (Some(game), Some(renderer), Some(surface)) = (
+                    self.game.as_mut(),
+                    self.renderer.as_mut(),
+                    self.surface.as_mut(),
+                ) else {
+                    return;
+                };
                 self.frame.commands.clear();
                 game.render(&mut self.context, &mut self.frame);
                 let _ = renderer.render(&self.frame);
                 self.frame.commands.clear();
                 let fb = renderer.framebuffer();
                 let (width, height) = self.context.window_size();
-                if let Err(error) = surface.present(width, height, fb.width(), fb.height(), fb.pixels()) {
+                if let Err(error) =
+                    surface.present(width, height, fb.width(), fb.height(), fb.pixels())
+                {
                     self.fail(EngineError::Render(Box::new(error)), event_loop);
                 }
-            },
+            }
             WindowEvent::Focused(focused) => {
                 self.context.set_focused(focused);
                 if !focused {
@@ -284,7 +309,9 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
         let previous_update = self.next_update;
         self.update(event_loop);
         if self.next_update != previous_update {
-            if let Some(window) = self.window.as_ref() { window.request_redraw(); }
+            if let Some(window) = self.window.as_ref() {
+                window.request_redraw();
+            }
         }
 
         if !self.context.is_exit_requested() {

@@ -106,9 +106,29 @@ impl SoftwareSurface {
         Ok(Self { surface })
     }
     /// Present a logical RGBA framebuffer using centered integer scaling.
-    pub fn present(&mut self, width: u32, height: u32, logical_width: u32, logical_height: u32, rgba: &[u8]) -> Result<(), softbuffer::SoftBufferError> {
-        if logical_width == 0 || logical_height == 0 || (logical_width as usize).checked_mul(logical_height as usize).and_then(|n| n.checked_mul(4)).is_none_or(|n| rgba.len() < n) { return Ok(()); }
-        let (Some(w), Some(h)) = (std::num::NonZeroU32::new(width), std::num::NonZeroU32::new(height)) else { return Ok(()); };
+    pub fn present(
+        &mut self,
+        width: u32,
+        height: u32,
+        logical_width: u32,
+        logical_height: u32,
+        rgba: &[u8],
+    ) -> Result<(), softbuffer::SoftBufferError> {
+        if logical_width == 0
+            || logical_height == 0
+            || (logical_width as usize)
+                .checked_mul(logical_height as usize)
+                .and_then(|n| n.checked_mul(4))
+                .is_none_or(|n| rgba.len() < n)
+        {
+            return Ok(());
+        }
+        let (Some(w), Some(h)) = (
+            std::num::NonZeroU32::new(width),
+            std::num::NonZeroU32::new(height),
+        ) else {
+            return Ok(());
+        };
         self.surface.resize(w, h)?;
         let mut buffer = self.surface.buffer_mut()?;
         buffer.fill(0);
@@ -118,9 +138,13 @@ impl SoftwareSurface {
             let top = (height - logical_height * scale) / 2;
             for y in 0..logical_height * scale {
                 for x in 0..logical_width * scale {
-                    let source = (((y / scale) as usize * logical_width as usize) + (x / scale) as usize) * 4;
+                    let source = (((y / scale) as usize * logical_width as usize)
+                        + (x / scale) as usize)
+                        * 4;
                     let dest = (top + y) as usize * width as usize + (left + x) as usize;
-                    buffer[dest] = (u32::from(rgba[source]) << 16) | (u32::from(rgba[source + 1]) << 8) | u32::from(rgba[source + 2]);
+                    buffer[dest] = (u32::from(rgba[source]) << 16)
+                        | (u32::from(rgba[source + 1]) << 8)
+                        | u32::from(rgba[source + 2]);
                 }
             }
         }

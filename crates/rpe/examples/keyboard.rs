@@ -1,4 +1,4 @@
-﻿use rust_pixel_engine::prelude::*;
+use rust_pixel_engine::prelude::*;
 
 struct KeyboardExample {
     x: f32,

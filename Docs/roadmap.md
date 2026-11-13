@@ -9,7 +9,7 @@ Rust 코드만으로 도트 게임을 만드는 경량 2D 엔진. 논리 픽셀�
 | 단계 | 상태 | 결과물 | 선행 |
 |---|---|---|---|
 | 001 Runtime Foundation | Implemented | 창, 생명주기, 키보드, 시간 | 없음 |
-| 002 CPU Pixel Renderer | Planned | 공통 명령, CPU 래스터화 및 화면 출력 | 001 |
+| 002 CPU Pixel Renderer | In progress | 공통 명령, CPU 래스터화 및 화면 출력 | 001 |
 | 003 Input & Timing | Planned | 입력 확장, 고정 갱신 | 002 |
 | 004 Sprite & Asset | Planned | PNG, 핸들, 스프라이트 | 002, 003 |
 | 005 GPU Renderer | Planned | 공통 명령 GPU 실행 | 004 |

@@ -6,6 +6,8 @@ pub struct Context {
     logical_width: u32,
     logical_height: u32,
     exit_requested: bool,
+    window_size: (u32, u32),
+    focused: bool,
 }
 
 impl Context {
@@ -16,6 +18,8 @@ impl Context {
             logical_width,
             logical_height,
             exit_requested: false,
+            window_size: (0, 0),
+            focused: false,
         }
     }
 
@@ -34,6 +38,23 @@ impl Context {
 
     pub fn logical_size(&self) -> (u32, u32) {
         (self.logical_width, self.logical_height)
+    }
+
+    /// Last reported physical window dimensions.
+    pub fn window_size(&self) -> (u32, u32) {
+        self.window_size
+    }
+    /// Whether the window currently has keyboard focus.
+    pub fn is_focused(&self) -> bool {
+        self.focused
+    }
+    #[doc(hidden)]
+    pub fn set_window_size(&mut self, width: u32, height: u32) {
+        self.window_size = (width, height);
+    }
+    #[doc(hidden)]
+    pub fn set_focused(&mut self, focused: bool) {
+        self.focused = focused;
     }
 
     pub fn request_exit(&mut self) {

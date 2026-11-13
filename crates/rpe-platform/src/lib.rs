@@ -13,8 +13,14 @@ pub fn window_attributes(title: &str, width: u32, height: u32) -> winit::window:
 }
 
 pub fn run<A: ApplicationHandler>(app: &mut A) -> Result<(), String> {
-    let event_loop = EventLoop::new().map_err(|err| err.to_string())?;
-    event_loop.run_app(app).map_err(|err| err.to_string())
+    run_with_error(app).map_err(|err| err.to_string())
+}
+
+pub fn run_with_error<A: ApplicationHandler>(
+    app: &mut A,
+) -> Result<(), winit::error::EventLoopError> {
+    let event_loop = EventLoop::new()?;
+    event_loop.run_app(app)
 }
 
 /// Maps a winit physical key to the platform-independent key type.
@@ -74,4 +80,17 @@ pub fn translate_key(code: winit::keyboard::KeyCode) -> Option<rpe_input::Key> {
         KeyCode::AltRight => rpe_input::Key::AltRight,
         _ => return None,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn translates_physical_keys() {
+        assert_eq!(
+            translate_key(winit::keyboard::KeyCode::KeyA),
+            Some(rpe_input::Key::A)
+        );
+        assert_eq!(translate_key(winit::keyboard::KeyCode::F24), None);
+    }
 }

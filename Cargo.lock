@@ -1638,6 +1638,7 @@ dependencies = [
 name = "rust-pixel-engine"
 version = "0.1.0"
 dependencies = [
+ "log",
  "rpe-animation",
  "rpe-assets",
  "rpe-audio",

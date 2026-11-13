@@ -16,7 +16,7 @@ impl Game for HelloGame {
     fn update(&mut self, ctx: &mut Context, dt: f32) {
         let frame = ctx.time().frame_count();
 
-        if frame % 60 == 0 {
+        if frame.is_multiple_of(60) {
             println!(
                 "[Game] frame={frame}, dt={dt:.5}, elapsed={:.2}",
                 ctx.time().elapsed_seconds(),
@@ -35,7 +35,7 @@ impl Game for HelloGame {
 
 fn main() -> Result<(), EngineError> {
     Engine::builder()
-        .title("RustPixelEngine — Hello Window")
+        .title("RustPixelEngine ??Hello Window")
         .resolution(320, 180)
         .window_size(1280, 720)
         .run::<HelloGame>()

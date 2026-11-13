@@ -52,6 +52,7 @@ full = [
 ]
 
 [dependencies]
+log.workspace = true
 rpe-core.workspace = true
 rpe-platform.workspace = true
 rpe-input.workspace = true

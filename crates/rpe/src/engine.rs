@@ -20,9 +20,10 @@ impl Engine {
     }
 
     pub(crate) fn run<G: Game>(config: EngineBuilder) -> Result<(), EngineError> {
+        log::info!("Starting engine");
         let mut app = Runtime::<G>::new(config);
 
-        let platform_result = rpe_platform::run(&mut app);
+        let platform_result = rpe_platform::run_with_error(&mut app);
 
         // Also clean up if the event loop returns an error.
         app.shutdown();
@@ -31,7 +32,8 @@ impl Engine {
             return Err(error);
         }
 
-        platform_result.map_err(EngineError::Platform)
+        log::info!("Event loop stopped");
+        platform_result.map_err(|error| EngineError::PlatformSource(Box::new(error)))
     }
 }
 
@@ -76,6 +78,7 @@ impl<G: Game> Runtime<G> {
             .expect("valid initialization transition");
         match G::init(&mut self.context) {
             Ok(game) => {
+                log::info!("Game initialized");
                 self.game = Some(game);
                 self.lifecycle
                     .transition(LifecycleState::Running)
@@ -100,6 +103,7 @@ impl<G: Game> Runtime<G> {
         }
         if let Some(mut game) = self.game.take() {
             game.shutdown(&mut self.context);
+            log::info!("Game shut down");
         }
 
         self.window = None;
@@ -160,11 +164,13 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
         let window = match event_loop.create_window(attributes) {
             Ok(window) => window,
             Err(error) => {
-                self.fail(EngineError::Platform(error.to_string()), event_loop);
+                self.fail(EngineError::PlatformSource(Box::new(error)), event_loop);
                 return;
             }
         };
 
+        let size = window.inner_size();
+        self.context.set_window_size(size.width, size.height);
         self.window = Some(window);
 
         if let Err(error) = self.initialize() {
@@ -198,20 +204,27 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
 
         match event {
             WindowEvent::CloseRequested => {
+                log::info!("Window close requested");
                 self.context.request_exit();
                 event_loop.exit();
             }
-            WindowEvent::Focused(false) => self.context.input_mut().release_all(),
+            WindowEvent::Resized(size) => self.context.set_window_size(size.width, size.height),
+            WindowEvent::Focused(focused) => {
+                self.context.set_focused(focused);
+                if !focused {
+                    self.context.input_mut().release_all();
+                }
+            }
             WindowEvent::KeyboardInput { event, .. } => {
-                if let rpe_platform::winit::keyboard::PhysicalKey::Code(code) = event.physical_key {
-                    if let Some(key) = rpe_platform::translate_key(code) {
-                        match event.state {
-                            rpe_platform::winit::event::ElementState::Pressed => {
-                                self.context.input_mut().press(key)
-                            }
-                            rpe_platform::winit::event::ElementState::Released => {
-                                self.context.input_mut().release(key)
-                            }
+                if let rpe_platform::winit::keyboard::PhysicalKey::Code(code) = event.physical_key
+                    && let Some(key) = rpe_platform::translate_key(code)
+                {
+                    match event.state {
+                        rpe_platform::winit::event::ElementState::Pressed => {
+                            self.context.input_mut().press(key)
+                        }
+                        rpe_platform::winit::event::ElementState::Released => {
+                            self.context.input_mut().release(key)
                         }
                     }
                 }
@@ -234,5 +247,51 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
 
     fn exiting(&mut self, _event_loop: &ActiveEventLoop) {
         self.shutdown();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    static INITS: AtomicUsize = AtomicUsize::new(0);
+    static SHUTDOWNS: AtomicUsize = AtomicUsize::new(0);
+    struct TestGame;
+    impl Game for TestGame {
+        fn init(_: &mut Context) -> Result<Self, rpe_core::GameError> {
+            INITS.fetch_add(1, Ordering::SeqCst);
+            Ok(Self)
+        }
+        fn shutdown(&mut self, _: &mut Context) {
+            SHUTDOWNS.fetch_add(1, Ordering::SeqCst);
+        }
+    }
+    struct FailedGame;
+    impl Game for FailedGame {
+        fn init(_: &mut Context) -> Result<Self, rpe_core::GameError> {
+            Err(rpe_core::GameError::new("init failed"))
+        }
+    }
+    #[test]
+    fn initialization_and_shutdown_are_once_only() {
+        let mut runtime = Runtime::<TestGame>::new(EngineBuilder::new());
+        runtime.initialize().expect("initialization");
+        runtime.initialize().expect("duplicate initialization");
+        assert_eq!(runtime.lifecycle.state(), LifecycleState::Running);
+        runtime.shutdown();
+        runtime.shutdown();
+        assert_eq!(INITS.load(Ordering::SeqCst), 1);
+        assert_eq!(SHUTDOWNS.load(Ordering::SeqCst), 1);
+        assert_eq!(runtime.lifecycle.state(), LifecycleState::Stopped);
+    }
+    #[test]
+    fn failed_initialization_stops_without_game() {
+        let mut runtime = Runtime::<FailedGame>::new(EngineBuilder::new());
+        assert!(matches!(
+            runtime.initialize(),
+            Err(EngineError::GameInitialization(_))
+        ));
+        assert!(runtime.game.is_none());
+        assert_eq!(runtime.lifecycle.state(), LifecycleState::Stopped);
     }
 }

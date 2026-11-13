@@ -1,10 +1,7 @@
-use rust_pixel_engine::prelude::*;
+﻿use rust_pixel_engine::prelude::*;
 
 struct RendererDemo;
 
-const fn color(r: u8, g: u8, b: u8, a: u8) -> Color {
-    Color { r, g, b, a }
-}
 
 fn rect(frame: &mut RenderFrame, x: i32, y: i32, width: u32, height: u32, color: Color) {
     frame.commands.push(DrawCommand::Rect {
@@ -35,24 +32,24 @@ impl Game for RendererDemo {
     fn render(&mut self, ctx: &mut Context, frame: &mut RenderFrame) {
         frame
             .commands
-            .push(DrawCommand::Clear(color(24, 30, 45, 255)));
+            .push(DrawCommand::Clear(Color::rgba(24, 30, 45, 255)));
 
         // Opaque red followed by translucent blue demonstrates source-over order.
-        rect(frame, 32, 35, 90, 85, color(255, 0, 0, 255));
-        rect(frame, 76, 65, 90, 85, color(0, 0, 255, 128));
+        rect(frame, 32, 35, 90, 85, Color::rgba(255, 0, 0, 255));
+        rect(frame, 76, 65, 90, 85, Color::rgba(0, 0, 255, 128));
 
         // These shapes cross the framebuffer bounds on all four sides.
-        rect(frame, -12, 8, 30, 20, color(255, 210, 0, 255));
-        rect(frame, 302, 8, 30, 20, color(255, 210, 0, 255));
-        rect(frame, 180, -10, 20, 25, color(0, 220, 160, 255));
-        rect(frame, 180, 165, 20, 25, color(0, 220, 160, 255));
+        rect(frame, -12, 8, 30, 20, Color::rgba(255, 210, 0, 255));
+        rect(frame, 302, 8, 30, 20, Color::rgba(255, 210, 0, 255));
+        rect(frame, 180, -10, 20, 25, Color::rgba(0, 220, 160, 255));
+        rect(frame, 180, 165, 20, 25, Color::rgba(0, 220, 160, 255));
 
         // A moving pixel makes updates and frame submission visible.
         let x = (ctx.time().frame_count() % 280) as i32 + 20;
         frame.commands.push(DrawCommand::Pixel {
             x,
             y: 160,
-            color: color(255, 255, 255, 255),
+            color: Color::rgba(255, 255, 255, 255),
         });
     }
 }

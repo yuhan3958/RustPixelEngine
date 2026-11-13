@@ -1,3 +1,5 @@
+![Rust Pixel Engine](project-icon-v4.png)
+
 # RustPixelEngine
 
 Rust 코드로 2D 도트 게임을 만드는 경량 엔진을 목표로 하는 Rust 2024 프로젝트입니다. 모듈화, 픽셀 단위의 일관성, 선택 가능한 CPU·GPU·Hybrid 렌더링과 선택적 게임 시스템을 지향합니다.

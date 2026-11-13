@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="EMPTY_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-animation/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-assets/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-audio/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-input/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-math/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-physics/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-platform/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-render-cpu/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-render-gpu/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-render-hybrid/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-render/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-tilemap/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-ui/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe-world/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

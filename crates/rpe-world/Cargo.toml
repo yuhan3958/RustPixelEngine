@@ -1,0 +1,13 @@
+[package]
+name = "rpe-world"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+rpe-core.workspace = true
+rpe-math.workspace = true
+
+[lints]
+workspace = true

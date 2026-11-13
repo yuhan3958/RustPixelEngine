@@ -1,0 +1,15 @@
+[package]
+name = "rpe-render-hybrid"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+rpe-render.workspace = true
+rpe-render-cpu.workspace = true
+rpe-render-gpu.workspace = true
+rpe-math.workspace = true
+
+[lints]
+workspace = true

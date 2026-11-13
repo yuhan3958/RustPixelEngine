@@ -1,0 +1,18 @@
+[package]
+name = "rpe-platform"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["window"]
+window = ["dep:winit"]
+
+[dependencies]
+rpe-core.workspace = true
+winit = { workspace = true, optional = true }
+log.workspace = true
+
+[lints]
+workspace = true

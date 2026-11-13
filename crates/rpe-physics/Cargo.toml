@@ -1,0 +1,18 @@
+[package]
+name = "rpe-physics"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+collision = []
+dynamics = ["collision"]
+
+[dependencies]
+rpe-math.workspace = true
+rpe-world.workspace = true
+
+[lints]
+workspace = true

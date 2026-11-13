@@ -1,0 +1,15 @@
+[package]
+name = "rpe-tilemap"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+rpe-math.workspace = true
+rpe-render.workspace = true
+rpe-assets.workspace = true
+rpe-world.workspace = true
+
+[lints]
+workspace = true

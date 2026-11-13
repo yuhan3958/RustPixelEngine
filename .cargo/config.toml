@@ -1,0 +1,19 @@
+[build]
+incremental = true
+
+[alias]
+c = "check"
+b = "build"
+t = "test"
+r = "run"
+lint = "clippy --workspace --all-targets"
+fmt-check = "fmt --all -- --check"
+release-small = "build --release"
+release-fast = "build --profile release-performance"
+
+[term]
+color = "auto"
+progress.when = "auto"
+
+[net]
+retry = 3

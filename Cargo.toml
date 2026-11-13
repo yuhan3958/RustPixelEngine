@@ -1,0 +1,112 @@
+[workspace]
+resolver = "3"
+
+members = [
+    "crates/rpe",
+    "crates/rpe-core",
+    "crates/rpe-platform",
+    "crates/rpe-input",
+    "crates/rpe-math",
+    "crates/rpe-render",
+    "crates/rpe-render-cpu",
+    "crates/rpe-render-gpu",
+    "crates/rpe-render-hybrid",
+    "crates/rpe-assets",
+    "crates/rpe-world",
+    "crates/rpe-tilemap",
+    "crates/rpe-animation",
+    "crates/rpe-physics",
+    "crates/rpe-audio",
+    "crates/rpe-ui", "crates/rpe", "crates/rpe-core", "crates/rpe-platform", "crates/rpe-input", "crates/rpe-math", "crates/rpe-render",
+]
+
+default-members = [
+    "crates/rpe",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yuhan3958/RustPixelEngine"
+readme = "README.md"
+keywords = ["game", "engine", "2d", "pixel-art", "rust"]
+categories = ["game-engines", "graphics"]
+publish = false
+
+[workspace.dependencies]
+# ==================================================
+# Internal crates
+# ==================================================
+
+rust-pixel-engine = { path = "crates/rpe" }
+
+rpe-core = { path = "crates/rpe-core" }
+rpe-platform = { path = "crates/rpe-platform" }
+rpe-input = { path = "crates/rpe-input" }
+rpe-math = { path = "crates/rpe-math" }
+
+rpe-render = { path = "crates/rpe-render" }
+rpe-render-cpu = { path = "crates/rpe-render-cpu" }
+rpe-render-gpu = { path = "crates/rpe-render-gpu" }
+rpe-render-hybrid = { path = "crates/rpe-render-hybrid" }
+
+rpe-assets = { path = "crates/rpe-assets" }
+rpe-world = { path = "crates/rpe-world" }
+
+rpe-tilemap = { path = "crates/rpe-tilemap" }
+rpe-animation = { path = "crates/rpe-animation" }
+rpe-physics = { path = "crates/rpe-physics" }
+rpe-audio = { path = "crates/rpe-audio" }
+rpe-ui = { path = "crates/rpe-ui" }
+
+# ==================================================
+# External crates
+# ==================================================
+
+winit = "0.30"
+wgpu = "30"
+glam = "0.34.3"
+image = { version = "0.25", default-features = false, features = ["png"] }
+log = "0.4"
+
+# ==================================================
+# Build profiles
+# ==================================================
+
+[profile.dev]
+opt-level = 0
+debug = true
+incremental = true
+overflow-checks = true
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release]
+opt-level = "z"
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+debug = false
+
+[profile.release-performance]
+inherits = "release"
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+
+[profile.profiling]
+inherits = "release-performance"
+debug = true
+strip = "none"
+
+[workspace.lints.rust]
+unsafe_op_in_unsafe_fn = "deny"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+unwrap_used = "warn"

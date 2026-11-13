@@ -1,0 +1,76 @@
+[package]
+name = "rust-pixel-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+name = "rust_pixel_engine"
+path = "src/lib.rs"
+
+[features]
+default = ["cpu"]
+
+# Rendering backends
+cpu = ["dep:rpe-render-cpu"]
+gpu = ["dep:rpe-render-gpu"]
+hybrid = [
+    "cpu",
+    "gpu",
+    "dep:rpe-render-hybrid",
+]
+
+# Optional engine systems
+world = ["dep:rpe-world"]
+
+tilemap = [
+    "dep:rpe-tilemap",
+    "world",
+]
+
+animation = ["dep:rpe-animation"]
+
+physics = [
+    "dep:rpe-physics",
+    "world",
+]
+
+audio = ["dep:rpe-audio"]
+
+ui = ["dep:rpe-ui"]
+
+# Convenience presets
+full = [
+    "hybrid",
+    "world",
+    "tilemap",
+    "animation",
+    "physics",
+    "audio",
+    "ui",
+]
+
+[dependencies]
+rpe-core.workspace = true
+rpe-platform.workspace = true
+rpe-input.workspace = true
+rpe-math.workspace = true
+rpe-render.workspace = true
+rpe-assets.workspace = true
+
+# Optional render backends
+rpe-render-cpu = { workspace = true, optional = true }
+rpe-render-gpu = { workspace = true, optional = true }
+rpe-render-hybrid = { workspace = true, optional = true }
+
+# Optional engine modules
+rpe-world = { workspace = true, optional = true }
+rpe-tilemap = { workspace = true, optional = true }
+rpe-animation = { workspace = true, optional = true }
+rpe-physics = { workspace = true, optional = true }
+rpe-audio = { workspace = true, optional = true }
+rpe-ui = { workspace = true, optional = true }
+
+[lints]
+workspace = true

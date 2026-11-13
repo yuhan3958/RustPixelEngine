@@ -38,10 +38,12 @@ world/entity/scene, camera, animation, tilemap, AABB 충돌, 선택 물리, 오�
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct EntityId { pub index: u32, pub generation: u32 }
 pub trait Scene {
-    fn update(&mut self, dt: f32);
-    fn render(&mut self, frame: &mut RenderFrame);
+    fn update(&mut self, ctx: &mut Context, dt: f32);
+    fn render(&mut self, ctx: &mut Context, frame: &mut RenderFrame);
 }
 ```
+
+`Game`의 업데이트와 렌더링을 현재 활성 Scene의 대응하는 메서드에 위임한다. Scene은 게임의 입력과 공통 상태에 접근할 수 있도록 `Context`를 받는다. 구체적인 소유권과 전환 API는 구현 전 설계한다.
 
 ## 8. Internal Design
 
@@ -68,7 +70,7 @@ World는 세대 ID 슬롯과 사용자 객체를 소유하고 제거한 ID를 �
 - 사전 조건: M007-T01 월드 및 객체 수명 구현.
 - 수정 대상 모듈: world, rpe.
 - 구현 사항: Scene 진입·종료, 업데이트·렌더링, 지연 전환과 전환 실패 복구를 Game 생명주기에 연결한다. 공유 상태와 리소스 소유권을 정의한다.
-- 테스트 방법: 초기 진입, 전환 순서, 실패 시 기존 Scene 유지, 종료 및 리소스 정리를 검증한다.
+- 테스트 방법: 활성 Scene에 update·render 위임, Context·dt·frame 전달, 초기 진입, 전환 순서, 실패 시 기존 Scene 유지, 종료 및 리소스 정리를 검증한다.
 - 완료 기준: 공개 API 문서, 메뉴와 게임 Scene 전환 예제, 단위·통합 테스트를 작성하고 검증한다.
 
 ### M007-T02 — 카메라와 애니메이션

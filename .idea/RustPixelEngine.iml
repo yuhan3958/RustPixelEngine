@@ -17,6 +17,7 @@
       <sourceFolder url="file://$MODULE_DIR$/crates/rpe-tilemap/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/rpe-ui/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/rpe-world/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/crates/rpe/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/crates/rpe/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/hello-window/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />

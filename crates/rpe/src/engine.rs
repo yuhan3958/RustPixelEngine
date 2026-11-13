@@ -20,9 +20,7 @@ impl Engine {
         EngineBuilder::new()
     }
 
-    pub(crate) fn run<G: Game>(
-        config: EngineBuilder,
-    ) -> Result<(), EngineError> {
+    pub(crate) fn run<G: Game>(config: EngineBuilder) -> Result<(), EngineError> {
         let mut app = Runtime::<G>::new(config);
 
         let platform_result = rpe_platform::run(&mut app);
@@ -49,10 +47,7 @@ struct Runtime<G: Game> {
 
 impl<G: Game> Runtime<G> {
     fn new(config: EngineBuilder) -> Self {
-        let context = Context::new(
-            config.logical_width,
-            config.logical_height,
-        );
+        let context = Context::new(config.logical_width, config.logical_height);
 
         Self {
             config,
@@ -64,11 +59,7 @@ impl<G: Game> Runtime<G> {
         }
     }
 
-    fn fail(
-        &mut self,
-        error: EngineError,
-        event_loop: &ActiveEventLoop,
-    ) {
+    fn fail(&mut self, error: EngineError, event_loop: &ActiveEventLoop) {
         self.error = Some(error);
         event_loop.exit();
     }
@@ -127,10 +118,7 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
         let window = match event_loop.create_window(attributes) {
             Ok(window) => window,
             Err(error) => {
-                self.fail(
-                    EngineError::Platform(error.to_string()),
-                    event_loop,
-                );
+                self.fail(EngineError::Platform(error.to_string()), event_loop);
                 return;
             }
         };
@@ -142,8 +130,7 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
             match G::init(&mut self.context) {
                 Ok(game) => {
                     self.game = Some(game);
-                    self.next_update =
-                        Instant::now() + UPDATE_INTERVAL;
+                    self.next_update = Instant::now() + UPDATE_INTERVAL;
                 }
                 Err(error) => {
                     self.fail(error.into(), event_loop);
@@ -152,9 +139,7 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
             }
         }
 
-        event_loop.set_control_flow(ControlFlow::WaitUntil(
-            self.next_update,
-        ));
+        event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_update));
     }
 
     fn window_event(
@@ -185,9 +170,7 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
         self.update(event_loop);
 
         if !self.context.is_exit_requested() {
-            event_loop.set_control_flow(ControlFlow::WaitUntil(
-                self.next_update,
-            ));
+            event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_update));
         }
     }
 

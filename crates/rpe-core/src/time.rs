@@ -29,8 +29,7 @@ impl Time {
     pub fn tick(&mut self) {
         let now = Instant::now();
 
-        self.delta_seconds =
-            now.duration_since(self.last_update).as_secs_f32();
+        self.delta_seconds = now.duration_since(self.last_update).as_secs_f32();
 
         self.last_update = now;
         self.frame_count = self.frame_count.saturating_add(1);
@@ -46,5 +45,52 @@ impl Time {
 
     pub fn frame_count(&self) -> u64 {
         self.frame_count
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn initial_time_is_zero() {
+        let time = Time::new();
+
+        assert_eq!(time.frame_count(), 0);
+        assert_eq!(time.delta_seconds(), 0.0);
+        assert!(time.elapsed_seconds() >= 0.0);
+    }
+
+    #[test]
+    fn tick_increments_frame_count() {
+        let mut time = Time::new();
+
+        time.tick();
+        assert_eq!(time.frame_count(), 1);
+
+        time.tick();
+        assert_eq!(time.frame_count(), 2);
+    }
+
+    #[test]
+    fn delta_is_non_negative() {
+        let mut time = Time::new();
+
+        for _ in 0..100 {
+            time.tick();
+
+            assert!(time.delta_seconds() >= 0.0);
+            assert!(time.delta_seconds().is_finite());
+        }
+    }
+
+    #[test]
+    fn elapsed_time_is_monotonic() {
+        let time = Time::new();
+
+        let before = time.elapsed_seconds();
+        let after = time.elapsed_seconds();
+
+        assert!(after >= before);
     }
 }

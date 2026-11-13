@@ -8,10 +8,7 @@ impl Game for HelloGame {
 
         let (width, height) = ctx.logical_size();
 
-        println!(
-            "[Game] Logical resolution: {}x{}",
-            width, height,
-        );
+        println!("[Game] Logical resolution: {}x{}", width, height,);
 
         Ok(Self)
     }
@@ -32,10 +29,7 @@ impl Game for HelloGame {
     }
 
     fn shutdown(&mut self, ctx: &mut Context) {
-        println!(
-            "[Game] Shutdown after {} updates",
-            ctx.time().frame_count(),
-        );
+        println!("[Game] Shutdown after {} updates", ctx.time().frame_count(),);
     }
 }
 

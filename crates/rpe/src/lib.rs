@@ -6,9 +6,6 @@ pub use builder::EngineBuilder;
 pub use engine::Engine;
 
 pub use rpe_core::{
-    Context,
-    EngineError,
-    Game,
-    GameError,
+    Context, EngineError, Game, GameError, InvalidLifecycleTransition, Lifecycle, LifecycleState,
     Time,
 };

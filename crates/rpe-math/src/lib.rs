@@ -1,8 +1,4 @@
-pub use glam::{
-    IVec2,
-    UVec2,
-    Vec2,
-};
+pub use glam::{IVec2, UVec2, Vec2};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Size2D {

@@ -43,6 +43,7 @@ struct Runtime<G: Game> {
     next_update: Instant,
     error: Option<EngineError>,
     lifecycle: Lifecycle,
+    suspended: bool,
 }
 
 impl<G: Game> Runtime<G> {
@@ -57,6 +58,7 @@ impl<G: Game> Runtime<G> {
             next_update: Instant::now() + UPDATE_INTERVAL,
             error: None,
             lifecycle: Lifecycle::new(),
+            suspended: false,
         }
     }
 
@@ -139,8 +141,11 @@ impl<G: Game> Runtime<G> {
 
 impl<G: Game> ApplicationHandler for Runtime<G> {
     fn resumed(&mut self, event_loop: &ActiveEventLoop) {
-        // Resumed can happen more than once.
+        self.suspended = false;
+        self.context.reset_time_baseline();
+        self.next_update = Instant::now() + UPDATE_INTERVAL;
         if self.window.is_some() {
+            event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_update));
             return;
         }
 
@@ -169,6 +174,11 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
         event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_update));
     }
 
+    fn suspended(&mut self, event_loop: &ActiveEventLoop) {
+        self.suspended = true;
+        event_loop.set_control_flow(ControlFlow::Wait);
+    }
+
     fn window_event(
         &mut self,
         event_loop: &ActiveEventLoop,
@@ -190,7 +200,7 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
     }
 
     fn about_to_wait(&mut self, event_loop: &ActiveEventLoop) {
-        if self.game.is_none() {
+        if self.game.is_none() || self.suspended {
             return;
         }
 

@@ -35,6 +35,12 @@ impl Time {
         self.frame_count = self.frame_count.saturating_add(1);
     }
 
+    /// Resets the frame baseline after a pause without changing frame count.
+    pub fn reset_baseline(&mut self) {
+        self.last_update = Instant::now();
+        self.delta_seconds = 0.0;
+    }
+
     pub fn delta_seconds(&self) -> f32 {
         self.delta_seconds
     }

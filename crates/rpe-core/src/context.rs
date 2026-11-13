@@ -33,6 +33,11 @@ impl Context {
         self.exit_requested
     }
 
+    /// Resets the time baseline when the application resumes.
+    pub fn reset_time_baseline(&mut self) {
+        self.time.reset_baseline();
+    }
+
     // Internal engine access.
     pub fn advance_time(&mut self) {
         self.time.tick();

@@ -80,3 +80,64 @@ mod tests {
         assert_eq!(f.pixels().len(), 8);
     }
 }
+
+/// Executes draw commands against a CPU framebuffer.
+pub struct CpuRenderer {
+    framebuffer: Framebuffer,
+}
+impl CpuRenderer {
+    pub fn new(width: u32, height: u32) -> Result<Self, FramebufferError> {
+        Ok(Self { framebuffer: Framebuffer::new(width, height)? })
+    }
+    pub fn framebuffer(&self) -> &Framebuffer { &self.framebuffer }
+    fn blend_pixel(&mut self, x: i32, y: i32, source: Color) {
+        let Some(dest) = self.framebuffer.pixel(x, y) else { return; };
+        let asrc = u64::from(source.a);
+        let adst = u64::from(dest.a);
+        let alpha = asrc * 255 + adst * (255 - asrc);
+        let channel = |s: u8, d: u8| -> u8 {
+            if alpha == 0 { 0 } else {
+                ((u64::from(s) * asrc * 255 + u64::from(d) * adst * (255 - asrc) + alpha / 2) / alpha) as u8
+            }
+        };
+        self.framebuffer.set_pixel(x, y, Color {
+            r: channel(source.r, dest.r), g: channel(source.g, dest.g),
+            b: channel(source.b, dest.b), a: ((alpha + 127) / 255) as u8,
+        });
+    }
+}
+impl rpe_render::RenderBackend for CpuRenderer {
+    type Error = std::convert::Infallible;
+    fn render(&mut self, frame: &rpe_render::RenderFrame) -> Result<(), Self::Error> {
+        for command in &frame.commands {
+            match *command {
+                rpe_render::DrawCommand::Clear(color) => self.framebuffer.clear(color),
+                rpe_render::DrawCommand::Pixel { x, y, color } => self.blend_pixel(x, y, color),
+                rpe_render::DrawCommand::Rect { rect, color } => {
+                    let left = i64::from(rect.x).max(0);
+                    let top = i64::from(rect.y).max(0);
+                    let right = (i64::from(rect.x) + i64::from(rect.width)).min(i64::from(self.framebuffer.width())).min(i64::from(i32::MAX) + 1);
+                    let bottom = (i64::from(rect.y) + i64::from(rect.height)).min(i64::from(self.framebuffer.height())).min(i64::from(i32::MAX) + 1);
+                    for y in top..bottom {
+                        for x in left..right { self.blend_pixel(x as i32, y as i32, color); }
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod raster_tests {
+    use super::*;
+    use rpe_render::{DrawCommand, Rect, RenderBackend, RenderFrame};
+    #[test]
+    fn clips_and_blends_in_order() {
+        let mut renderer = CpuRenderer::new(1, 1).expect("renderer");
+        let red = Color { r: 255, g: 0, b: 0, a: 255 };
+        let blue = Color { r: 0, g: 0, b: 255, a: 128 };
+        renderer.render(&RenderFrame { commands: vec![DrawCommand::Clear(red), DrawCommand::Rect { rect: Rect { x: -1, y: -1, width: 2, height: 2 }, color: blue }] }).expect("render");
+        assert_eq!(renderer.framebuffer().pixel(0, 0), Some(Color { r: 127, g: 0, b: 128, a: 255 }));
+    }
+}

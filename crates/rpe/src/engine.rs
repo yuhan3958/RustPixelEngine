@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use rpe_core::{Context, EngineError, Game};
+use rpe_core::{Context, EngineError, Game, Lifecycle, LifecycleState};
 use rpe_platform::winit::{
     application::ApplicationHandler,
     event::WindowEvent,
@@ -42,6 +42,7 @@ struct Runtime<G: Game> {
     context: Context,
     next_update: Instant,
     error: Option<EngineError>,
+    lifecycle: Lifecycle,
 }
 
 impl<G: Game> Runtime<G> {
@@ -55,6 +56,7 @@ impl<G: Game> Runtime<G> {
             context,
             next_update: Instant::now() + UPDATE_INTERVAL,
             error: None,
+            lifecycle: Lifecycle::new(),
         }
     }
 
@@ -63,12 +65,47 @@ impl<G: Game> Runtime<G> {
         event_loop.exit();
     }
 
+    fn initialize(&mut self) -> Result<(), EngineError> {
+        if self.lifecycle.state() != LifecycleState::Created {
+            return Ok(());
+        }
+        self.lifecycle
+            .transition(LifecycleState::Initializing)
+            .expect("valid initialization transition");
+        match G::init(&mut self.context) {
+            Ok(game) => {
+                self.game = Some(game);
+                self.lifecycle
+                    .transition(LifecycleState::Running)
+                    .expect("valid running transition");
+                Ok(())
+            }
+            Err(error) => {
+                self.shutdown();
+                Err(error.into())
+            }
+        }
+    }
+
     fn shutdown(&mut self) {
+        if matches!(
+            self.lifecycle.state(),
+            LifecycleState::Initializing | LifecycleState::Running
+        ) {
+            self.lifecycle
+                .transition(LifecycleState::Stopping)
+                .expect("valid stopping transition");
+        }
         if let Some(mut game) = self.game.take() {
             game.shutdown(&mut self.context);
         }
 
         self.window = None;
+        if self.lifecycle.state() == LifecycleState::Stopping {
+            self.lifecycle
+                .transition(LifecycleState::Stopped)
+                .expect("valid stopped transition");
+        }
     }
 
     fn update(&mut self, event_loop: &ActiveEventLoop) {
@@ -123,19 +160,11 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
 
         self.window = Some(window);
 
-        // Game initialization must happen exactly once.
-        if self.game.is_none() {
-            match G::init(&mut self.context) {
-                Ok(game) => {
-                    self.game = Some(game);
-                    self.next_update = Instant::now() + UPDATE_INTERVAL;
-                }
-                Err(error) => {
-                    self.fail(error.into(), event_loop);
-                    return;
-                }
-            }
+        if let Err(error) = self.initialize() {
+            self.fail(error, event_loop);
+            return;
         }
+        self.next_update = Instant::now() + UPDATE_INTERVAL;
 
         event_loop.set_control_flow(ControlFlow::WaitUntil(self.next_update));
     }

@@ -3,7 +3,6 @@ use std::time::{Duration, Instant};
 use rpe_core::{Context, EngineError, Game};
 use rpe_platform::winit::{
     application::ApplicationHandler,
-    dpi::LogicalSize,
     event::WindowEvent,
     event_loop::{ActiveEventLoop, ControlFlow},
     window::{Window, WindowId},
@@ -108,12 +107,11 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
             return;
         }
 
-        let attributes = Window::default_attributes()
-            .with_title(self.config.title.clone())
-            .with_inner_size(LogicalSize::new(
-                self.config.window_width as f64,
-                self.config.window_height as f64,
-            ));
+        let attributes = rpe_platform::window_attributes(
+            &self.config.title,
+            self.config.window_width,
+            self.config.window_height,
+        );
 
         let window = match event_loop.create_window(attributes) {
             Ok(window) => window,

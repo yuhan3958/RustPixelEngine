@@ -11,3 +11,5 @@ pub use rpe_core::{
 };
 
 pub use rpe_input::{InputState, Key};
+
+pub use rpe_render::{Color, DrawCommand, Rect, RenderBackend, RenderFrame};

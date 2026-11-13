@@ -1,3 +1,3 @@
 pub use crate::{
-    Context, Engine, EngineBuilder, EngineError, Game, GameError, InputState, Key, Time,
+    Color, DrawCommand, Rect, RenderBackend, RenderFrame, Context, Engine, EngineBuilder, EngineError, Game, GameError, InputState, Key, Time,
 };

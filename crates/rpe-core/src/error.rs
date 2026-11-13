@@ -28,6 +28,7 @@ pub enum EngineError {
     Platform(String),
     PlatformSource(Box<dyn Error + Send + Sync>),
     GameInitialization(GameError),
+    Render(Box<dyn Error>),
 }
 
 impl fmt::Display for EngineError {
@@ -40,6 +41,7 @@ impl fmt::Display for EngineError {
                 write!(f, "Platform error: {msg}")
             }
             Self::PlatformSource(err) => write!(f, "Platform error: {err}"),
+            Self::Render(err) => write!(f, "Render error: {err}"),
             Self::GameInitialization(err) => {
                 write!(f, "Game initialization failed: {err}")
             }
@@ -51,6 +53,7 @@ impl Error for EngineError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
             Self::GameInitialization(err) => Some(err),
+            Self::Render(err) => Some(err.as_ref()),
             Self::PlatformSource(err) => Some(err.as_ref()),
             _ => None,
         }

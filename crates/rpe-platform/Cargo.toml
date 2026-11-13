@@ -7,13 +7,14 @@ publish.workspace = true
 
 [features]
 default = ["window"]
-window = ["dep:winit"]
+window = ["dep:winit", "dep:softbuffer"]
 
 [dependencies]
 rpe-core.workspace = true
 rpe-input.workspace = true
 winit = { workspace = true, optional = true }
 log.workspace = true
+softbuffer = { version = "0.4.8", optional = true }
 
 [lints]
 workspace = true

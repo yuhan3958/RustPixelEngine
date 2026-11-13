@@ -94,3 +94,36 @@ mod tests {
         assert_eq!(translate_key(winit::keyboard::KeyCode::F24), None);
     }
 }
+
+/// A software surface owned on the window event thread.
+pub struct SoftwareSurface {
+    surface: softbuffer::Surface<std::sync::Arc<Window>, std::sync::Arc<Window>>,
+}
+impl SoftwareSurface {
+    pub fn new(window: std::sync::Arc<Window>) -> Result<Self, softbuffer::SoftBufferError> {
+        let context = softbuffer::Context::new(window.clone())?;
+        let surface = softbuffer::Surface::new(&context, window)?;
+        Ok(Self { surface })
+    }
+    /// Present a logical RGBA framebuffer using centered integer scaling.
+    pub fn present(&mut self, width: u32, height: u32, logical_width: u32, logical_height: u32, rgba: &[u8]) -> Result<(), softbuffer::SoftBufferError> {
+        if logical_width == 0 || logical_height == 0 || (logical_width as usize).checked_mul(logical_height as usize).and_then(|n| n.checked_mul(4)).is_none_or(|n| rgba.len() < n) { return Ok(()); }
+        let (Some(w), Some(h)) = (std::num::NonZeroU32::new(width), std::num::NonZeroU32::new(height)) else { return Ok(()); };
+        self.surface.resize(w, h)?;
+        let mut buffer = self.surface.buffer_mut()?;
+        buffer.fill(0);
+        let scale = (width / logical_width).min(height / logical_height);
+        if scale > 0 {
+            let left = (width - logical_width * scale) / 2;
+            let top = (height - logical_height * scale) / 2;
+            for y in 0..logical_height * scale {
+                for x in 0..logical_width * scale {
+                    let source = (((y / scale) as usize * logical_width as usize) + (x / scale) as usize) * 4;
+                    let dest = (top + y) as usize * width as usize + (left + x) as usize;
+                    buffer[dest] = (u32::from(rgba[source]) << 16) | (u32::from(rgba[source + 1]) << 8) | u32::from(rgba[source + 2]);
+                }
+            }
+        }
+        buffer.present()
+    }
+}

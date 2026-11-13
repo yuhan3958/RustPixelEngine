@@ -11,6 +11,7 @@ window = ["dep:winit"]
 
 [dependencies]
 rpe-core.workspace = true
+rpe-input.workspace = true
 winit = { workspace = true, optional = true }
 log.workspace = true
 

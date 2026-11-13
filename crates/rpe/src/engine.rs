@@ -133,6 +133,8 @@ impl<G: Game> Runtime<G> {
             game.update(&mut self.context, dt);
         }
 
+        self.context.input_mut().end_frame();
+
         if self.context.is_exit_requested() {
             event_loop.exit();
         }
@@ -176,6 +178,7 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
 
     fn suspended(&mut self, event_loop: &ActiveEventLoop) {
         self.suspended = true;
+        self.context.input_mut().release_all();
         event_loop.set_control_flow(ControlFlow::Wait);
     }
 
@@ -193,9 +196,27 @@ impl<G: Game> ApplicationHandler for Runtime<G> {
             return;
         }
 
-        if let WindowEvent::CloseRequested = event {
-            self.context.request_exit();
-            event_loop.exit();
+        match event {
+            WindowEvent::CloseRequested => {
+                self.context.request_exit();
+                event_loop.exit();
+            }
+            WindowEvent::Focused(false) => self.context.input_mut().release_all(),
+            WindowEvent::KeyboardInput { event, .. } => {
+                if let rpe_platform::winit::keyboard::PhysicalKey::Code(code) = event.physical_key {
+                    if let Some(key) = rpe_platform::translate_key(code) {
+                        match event.state {
+                            rpe_platform::winit::event::ElementState::Pressed => {
+                                self.context.input_mut().press(key)
+                            }
+                            rpe_platform::winit::event::ElementState::Released => {
+                                self.context.input_mut().release(key)
+                            }
+                        }
+                    }
+                }
+            }
+            _ => {}
         }
     }
 

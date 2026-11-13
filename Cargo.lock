@@ -1532,6 +1532,7 @@ name = "rpe-core"
 version = "0.1.0"
 dependencies = [
  "log",
+ "rpe-input",
  "rpe-math",
 ]
 
@@ -1563,6 +1564,7 @@ version = "0.1.0"
 dependencies = [
  "log",
  "rpe-core",
+ "rpe-input",
  "winit",
 ]
 

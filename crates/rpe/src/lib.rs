@@ -9,3 +9,5 @@ pub use rpe_core::{
     Context, EngineError, Game, GameError, InvalidLifecycleTransition, Lifecycle, LifecycleState,
     Time,
 };
+
+pub use rpe_input::{InputState, Key};

@@ -23,6 +23,7 @@ Rust 2024 Edition을 지원하는 툴체인과 Cargo, 창을 표시할 수 있�
 cargo run -p hello-window
 cargo run -p cpu-renderer-example
 cargo run -p keyboard-example
+cargo run -p input-timing-example
 cargo run -p pixels-example
 ```
 
@@ -112,3 +113,18 @@ Cargo에 `cpu`, `gpu`, `hybrid` 및 게임 시스템 feature가 선언되어 있
 단위 테스트가 코드에 포함되어 있습니다. 검증 시 `cargo test --workspace`와 GUI 예제를 대상 환경에서 실행하고 결과를 기록합니다. GUI, GPU 및 오디오 검증은 사용 가능한 환경에 따라 별도로 평가해야 합니다.
 
 Workspace 메타데이터의 라이선스 선언은 `MIT OR Apache-2.0`입니다. 배포 전 라이선스 파일과 의존성 검토가 필요하며, 현재 Workspace 패키지는 `publish = false`입니다.
+
+
+### 고정 업데이트와 입력
+
+`Engine::builder().timing(TimingConfig { fixed_hz: 60, max_steps: 5 })`로 고정 갱신을 설정합니다. 두 값은 0보다 커야 합니다. 누적 시간이 최대 스텝 수를 초과하면 나머지 한 스텝 미만의 시간만 유지하고 버린 시간을 로그에 기록합니다.
+
+고정 및 가변 업데이트는 독립적인 입력 이벤트 목록을 사용합니다. `ctx.input().events()`는 키와 마우스 버튼의 실제 전이와 커서 이동을 수집 순서로 제공합니다. 커서 이벤트에는 당시 물리·논리 좌표가 포함됩니다. 고정 스텝이 없는 프레임의 이벤트는 다음 고정 스텝까지 유지되며 여러 스텝이 실행될 때 첫 스텝에서 소비됩니다. 키 반복은 전이로 기록하지 않습니다. 포커스를 잃으면 키 순서, 마우스 버튼 순서로 해제 이벤트가 생성됩니다. 현재 눌림 상태는 최신 상태입니다.
+
+`mouse_position()`은 물리 좌표, `logical_mouse_position()`은 논리 좌표를 반환합니다. 논리 좌표는 화면 여백이나 배율 0에서 `None`입니다. `bind_action(name, buttons)`로 키와 마우스 버튼을 묶고 `action_pressed(name)`으로 하나라도 눌렸는지 확인할 수 있습니다.
+
+통합 예제는 `cargo run -p input-timing-example`으로 실행합니다. 방향키와 D로 사각형을 움직이고 키와 마우스 입력에 대한 두 소비자의 이벤트를 확인할 수 있습니다.
+
+표시 갱신마다 고정 업데이트를 필요한 횟수만큼 실행하고 `update`와 `render`를 차례로 한 번씩 호출합니다. 이후 redraw 이벤트에서 마지막으로 생성한 프레임을 표시합니다. 창 크기 변경 등으로 추가 redraw가 발생하면 `render`를 다시 호출하지 않고 같은 프레임을 표시합니다. 일시 중단 후 재개할 때는 시간 기준을 재설정합니다.
+
+애플리케이션에서 `log` trace를 활성화하면 각 표시 갱신의 간격, 고정 스텝 수, 버린 시간, 프레임 이벤트 수와 대기 중인 고정 이벤트 수를 수집할 수 있습니다. 입력 이벤트는 두 소비자 목록에 각각 한 번 저장됩니다. 실제 성능 수치는 실행 환경과 표본을 기록하여 측정해야 합니다.

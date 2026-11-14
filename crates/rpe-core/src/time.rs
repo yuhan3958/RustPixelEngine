@@ -100,3 +100,77 @@ mod tests {
         assert!(after >= before);
     }
 }
+
+/// Fixed simulation cadence and catch-up limit.
+#[derive(Debug, Clone, Copy)]
+pub struct TimingConfig { pub fixed_hz: u32, pub max_steps: u32 }
+impl Default for TimingConfig {
+    fn default() -> Self { Self { fixed_hz: 60, max_steps: 5 } }
+}
+
+/// Accumulates elapsed time and discards whole steps beyond the catch-up limit.
+#[derive(Debug)]
+pub struct FixedScheduler { config: TimingConfig, accumulator: f64 }
+impl FixedScheduler {
+    pub fn new(config: TimingConfig) -> Result<Self, crate::EngineError> {
+        if config.fixed_hz == 0 || config.max_steps == 0 {
+            return Err(crate::EngineError::InvalidConfiguration("fixed_hz and max_steps must be greater than zero".into()));
+        }
+        Ok(Self { config, accumulator: 0.0 })
+    }
+    pub fn step_seconds(&self) -> f32 { 1.0 / self.config.fixed_hz as f32 }
+    /// Returns (number of updates, discarded seconds).
+    pub fn advance(&mut self, delta: f64) -> (u32, f64) {
+        if !delta.is_finite() {
+            return (0, 0.0);
+        }
+        self.accumulator += delta.max(0.0);
+        let step = 1.0 / f64::from(self.config.fixed_hz);
+        let available = (self.accumulator / step).floor();
+        let steps = available.min(f64::from(self.config.max_steps)) as u32;
+        let remainder = self.accumulator % step;
+        let discarded = if available > f64::from(steps) {
+            (self.accumulator - remainder - f64::from(steps) * step).max(0.0)
+        } else {
+            0.0
+        };
+        self.accumulator = remainder;
+        (steps, discarded)
+    }
+}
+
+#[cfg(test)]
+mod fixed_tests {
+    use super::*;
+    #[test]
+    fn validates_and_limits_catch_up() {
+        assert!(FixedScheduler::new(TimingConfig { fixed_hz: 0, max_steps: 1 }).is_err());
+        assert!(FixedScheduler::new(TimingConfig { fixed_hz: 60, max_steps: 0 }).is_err());
+        let mut scheduler = FixedScheduler::new(TimingConfig { fixed_hz: 10, max_steps: 2 }).unwrap();
+        assert_eq!(scheduler.advance(0.05).0, 0);
+        let (steps, dropped) = scheduler.advance(0.5);
+        assert_eq!(steps, 2);
+        assert!((dropped - 0.3).abs() < 0.000001);
+    }
+
+    #[test]
+    fn preserves_fractional_time_after_dropping_excess_steps() {
+        let mut scheduler = FixedScheduler::new(TimingConfig { fixed_hz: 10, max_steps: 2 }).unwrap();
+        let (steps, dropped) = scheduler.advance(0.55);
+        assert_eq!(steps, 2);
+        assert!((dropped - 0.3).abs() < 1e-9);
+        assert_eq!(scheduler.advance(0.051).0, 1);
+    }
+
+    #[test]
+    fn ignores_non_finite_deltas_without_poisoning_scheduler() {
+        let mut scheduler = FixedScheduler::new(TimingConfig::default()).unwrap();
+        assert_eq!(scheduler.advance(f64::INFINITY), (0, 0.0));
+        assert_eq!(scheduler.advance(f64::NAN), (0, 0.0));
+        assert_eq!(scheduler.advance(1.0 / 60.0).0, 1);
+        let (steps, dropped) = scheduler.advance(f64::MAX);
+        assert_eq!(steps, 5);
+        assert!(dropped.is_finite());
+        assert_eq!(scheduler.advance(1.0 / 30.0).0, 2);
+    }
+}

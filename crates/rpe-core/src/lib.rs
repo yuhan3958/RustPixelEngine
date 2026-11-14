@@ -8,4 +8,4 @@ pub use context::Context;
 pub use error::{EngineError, GameError};
 pub use game::Game;
 pub use lifecycle::{InvalidLifecycleTransition, Lifecycle, LifecycleState};
-pub use time::Time;
+pub use time::{FixedScheduler, Time, TimingConfig};

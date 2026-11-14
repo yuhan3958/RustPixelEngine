@@ -2,6 +2,7 @@ use crate::engine::Engine;
 use rpe_core::{EngineError, Game};
 
 pub struct EngineBuilder {
+    pub(crate) timing: rpe_core::TimingConfig,
     pub(crate) title: String,
     pub(crate) logical_width: u32,
     pub(crate) logical_height: u32,
@@ -12,6 +13,7 @@ pub struct EngineBuilder {
 impl Default for EngineBuilder {
     fn default() -> Self {
         Self {
+            timing: rpe_core::TimingConfig::default(),
             title: String::from("RustPixelEngine"),
             logical_width: 320,
             logical_height: 180,
@@ -24,6 +26,11 @@ impl Default for EngineBuilder {
 impl EngineBuilder {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn timing(mut self, timing: rpe_core::TimingConfig) -> Self {
+        self.timing = timing;
+        self
     }
 
     pub fn title(mut self, title: impl Into<String>) -> Self {
@@ -49,6 +56,7 @@ impl EngineBuilder {
     }
 
     fn validate(&self) -> Result<(), EngineError> {
+        rpe_core::FixedScheduler::new(self.timing)?;
         if self.logical_width == 0 || self.logical_height == 0 {
             return Err(EngineError::InvalidConfiguration(
                 "Logical resolution must be greater than zero".into(),

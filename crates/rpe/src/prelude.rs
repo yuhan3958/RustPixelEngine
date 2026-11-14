@@ -1,4 +1,4 @@
 pub use crate::{
     Color, Context, DrawCommand, Engine, EngineBuilder, EngineError, Game, GameError, InputState,
-    Key, Rect, RenderBackend, RenderFrame, Time,
+    Key, MouseButton, Button, InputEvent, Rect, RenderBackend, RenderFrame, Time, TimingConfig,
 };

@@ -22,6 +22,7 @@ members = [
     "examples/hello-window",
     "examples/cpu-renderer",
     "examples/keyboard",
+    "examples/input-timing",
     "examples/pixels"
 ]
 
